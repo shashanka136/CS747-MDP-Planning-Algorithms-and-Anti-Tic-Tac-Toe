@@ -1,6 +1,5 @@
 import numpy as np
 from pulp import *
-import matplotlib.pyplot as plt
 import argparse
 
 def get_mdp(mdp_file):
@@ -128,12 +127,14 @@ def howard_policy_iteration():
 		V = get_vpi(policy)
 		Q = get_Q(V)
 		new_policy = np.argmax(Q, axis = 1).reshape((nonts,1))
+	# print(V.shape, policy.shape)
+	# print(state_map)
 	V, policy = get_full(V, policy)
 	return V,policy
 	pass
 
 if __name__ == '__main__':
-	global s, nonts, a, ends, set_ends, t, p, r, mdptype, gamma, totpr, state_map, rev_state_map
+	global s, nonts, a, ends, set_ends, t, p, r, mdptype, gamma, totpr, state_map
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument('--mdp', type=str)
@@ -148,13 +149,14 @@ if __name__ == '__main__':
 	set_ends = set(ends)
 	nonts= s -len(ends)
 	state_map = np.arange(s, dtype=np.int32)
-	rev_state_map = np.arange(s, dtype=np.int32)
+	ends = np.array(ends, dtype=np.int32)
+	# print(len(ends))
 	end_ind = 0
 	for i in range(s):
 		state_map[i] = i-end_ind
-		rev_state_map[i-end_ind] = i
 		if end_ind < len(ends) and ends[end_ind] == i:
 			end_ind += 1
+	state_map[ends] = 0
 	if algo == 'vi':
 		V,pi = value_iteration()
 	elif algo == 'hpi'  or algo == 'nothing':
@@ -164,10 +166,3 @@ if __name__ == '__main__':
 	for i in range(s):
 		print('{:.8f}'.format(V[i][0]), end = ' ')
 		print(pi[i][0])
-	# print(a)
-	# print(s)
-	# print(ends)
-	# print(t)
-	# print(r)
-	# print(mdptype)
-	# print(gamma)
