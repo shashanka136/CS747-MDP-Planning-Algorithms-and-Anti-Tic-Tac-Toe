@@ -20,6 +20,11 @@ def print_policy(value_policy_file):
 	for i, state in enumerate(state_map):
 		pi = int(file.readline().lstrip().rstrip().split()[1])
 		print(state, end = ' ')
+		# if state[pi] != '0':
+		# 	for i in range(9):
+		# 		if state[i] == '0':
+		# 			pi = i
+		# 			break
 		x = ['0']*9
 		x[pi] = '1'
 		print(' '.join(x))

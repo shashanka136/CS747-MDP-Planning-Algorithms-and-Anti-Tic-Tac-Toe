@@ -51,9 +51,6 @@ def generate_next_policy(player, num_iter):
     print("\n","Generating the decoded policy file using decoder.py")
     subprocess.call(cmd_decoder,stdout = f)
     f.close()
-
-    os.remove('attt_mdp')
-    os.remove('attt_planner')
     return
 
 
@@ -81,6 +78,8 @@ if __name__ == "__main__":
         generate_next_policy(player,i)
         player = 3-player
     if keep == 0:
+        os.remove('attt_mdp')
+        os.remove('attt_planner')
         player = first_player
         for i in range(iterations):
             os.remove(f'./task3/p{player}_policy{i}.txt')

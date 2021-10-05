@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from pulp import *
 import argparse
 
@@ -129,6 +130,7 @@ def howard_policy_iteration():
 		new_policy = np.argmax(Q, axis = 1).reshape((nonts,1))
 	# print(V.shape, policy.shape)
 	# print(state_map)
+	print(Q[0], file=sys.stderr)
 	V, policy = get_full(V, policy)
 	return V,policy
 	pass
