@@ -26,6 +26,8 @@ def get_mdp(mdp_file):
 			break
 		maxrw = max(maxrw, float(l[4]))
 		minrw = min(minrw, float(l[4]))
+		if float(l[5]) == 0.00:
+			continue
 		t[int(l[1])][int(l[2])].append(int(l[3]))
 		r[int(l[1])][int(l[2])].append(float(l[4]))
 		p[int(l[1])][int(l[2])].append(float(l[5]))
@@ -119,7 +121,7 @@ def linear_programming():
 
 def howard_policy_iteration():
 	np.random.seed(0)
-	policy = np.random.randint(low = 0, high = a-1, size = (nonts,1))
+	policy = np.random.randint(low = 0, high = a, size = (nonts,1))
 	V = get_vpi(policy)
 	Q = get_Q(V)
 	new_policy = np.argmax(Q, axis = 1).reshape((nonts,1))
@@ -127,10 +129,10 @@ def howard_policy_iteration():
 		policy = new_policy
 		V = get_vpi(policy)
 		Q = get_Q(V)
-		new_policy = np.argmax(Q, axis = 1).reshape((nonts,1))
-	# print(V.shape, policy.shape)
-	# print(state_map)
-	print(Q[0], file=sys.stderr)
+		equal_to_max = (np.max(Q, axis = 1).reshape((nonts,1))) -V > 0.00
+		new_policy= np.where(equal_to_max, np.argmax(Q, axis = 1).reshape((nonts,1)), policy)
+		
+	# print(Q[0], file=sys.stderr)
 	V, policy = get_full(V, policy)
 	return V,policy
 	pass
