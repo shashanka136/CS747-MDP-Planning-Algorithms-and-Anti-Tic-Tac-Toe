@@ -1,7 +1,7 @@
 import argparse
 
 def terminal(state): # check if someone losing or winning
-	#don't check that 
+	#don't check that if it's a draw
 	for i in range(3):
 		if state[3+i] == state[i] ==state[6+i] and state[i] != '0':
 			return True
@@ -22,6 +22,7 @@ def terminal(state): # check if someone losing or winning
 
 def add_possible_transitions(state, action):
 	assert not terminal(state), 'states file is incorrect, contains a terminal state'
+	assert '0' in state, 'states file is incorrect, contains a terminal state'
 	global state_map, rev_state_map, player_id, player_id2, transitions, probs
 	num1 = rev_state_map[state]
 	if state[action] != '0':
@@ -68,9 +69,8 @@ def get_state_map(statesfile):
 def get_transitions(policyfile):
 	global state_map, rev_state_map, player_id, player_id2, probs
 	file = open(policyfile, 'r')
-	player_id = file.readline().lstrip().rstrip()
-	player_id2 = str(3-int(player_id))
-	player_id, player_id2 = player_id2, player_id
+	player_id2 = file.readline().lstrip().rstrip()
+	player_id = str(3-int(player_id2))
 	probs = {}
 	while True:
 		line = file.readline()
@@ -86,7 +86,7 @@ def get_transitions(policyfile):
 	pass
 
 if __name__ == "__main__":
-	global state_map, rev_state_map, player_id, player_id2, ends_start, probs, transitions
+	global state_map, rev_state_map, player_id, player_id2, probs, transitions
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--policy', type = str)
 	parser.add_argument('--states', type = str)
@@ -96,11 +96,10 @@ if __name__ == "__main__":
 	transitions = []
 	get_state_map(statesfile)
 	get_transitions(policyfile)
-	state_map.append('X')
-	print(f'numStates {len(state_map)}')
+	print(f'numStates {len(state_map)+1}')
 	print('numActions 9')
 	print('end', end = ' ')
-	print(len(state_map)-1)
+	print(len(state_map))
 	for transition in transitions:
 		print(f'transition {transition}')
 	print('mdptype episodic')

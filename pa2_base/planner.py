@@ -97,7 +97,9 @@ def value_iteration(): # run value iteration
 	V[1] = np.max(get_Q(V[0]), axis = 1).reshape((nonts,1))
 	while not (V[0] == V[1]).all():
 		x ^= 1
+		# print(V[0], V[1])
 		V[x] = np.max(get_Q(V[x^1]), axis = 1).reshape((nonts,1))
+	# print(get_Q(V[x])[0], file=sys.stderr)
 	V_ret, policy_ret = get_full(V[x], np.argmax(get_Q(V[x]), axis = 1).reshape((nonts,1)))
 	return V_ret, policy_ret
 
@@ -116,6 +118,8 @@ def linear_programming():
 	Vx = np.zeros((nonts,1))
 	for i in range(nonts):
 		Vx[i][0] = V[i].value()
+	# print(get_Q(Vx)[0], file=sys.stderr)
+	
 	V_ret, policy_ret = get_full(Vx, np.argmax(get_Q(Vx), axis = 1).reshape((nonts,1)))
 	return V_ret, policy_ret
 
@@ -161,9 +165,9 @@ if __name__ == '__main__':
 		if end_ind < len(ends) and ends[end_ind] == i:
 			end_ind += 1
 	state_map[ends] = 0
-	if algo == 'vi':
+	if algo == 'vi' or algo == 'nothing':
 		V,pi = value_iteration()
-	elif algo == 'hpi'  or algo == 'nothing':
+	elif algo == 'hpi':
 		V,pi = howard_policy_iteration()
 	elif algo == 'lp':
 		V,pi = linear_programming()

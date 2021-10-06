@@ -22,9 +22,9 @@ class VerifyOutputPlanner:
             for in_file in input_file_ls:
                 print("\n\n","-"*100)
                 if algo == 'default':
-                    cmd_planner = "time","python","planner.py","--mdp",in_file
+                    cmd_planner ="python","planner.py","--mdp",in_file
                 else:
-                    cmd_planner = "time","python","planner.py","--mdp",in_file,"--algorithm",algo
+                    cmd_planner = "python","planner.py","--mdp",in_file,"--algorithm",algo
                 print('test case',str(counter),algo,":\t"," ".join(cmd_planner))
                 counter+=1
                 cmd_output = subprocess.check_output(cmd_planner,universal_newlines=True)
