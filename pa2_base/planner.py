@@ -4,7 +4,7 @@ from pulp import *
 import argparse
 
 def get_mdp(mdp_file):
-	global s,a, ends, t, p, r, mdptype, gamma, totpr
+	global s,a, ends, set_ends, t, p, r, mdptype, gamma, totpr
 	global maxrw, minrw
 	file = open(mdp_file, 'r')
 	maxrw = 0
@@ -15,6 +15,10 @@ def get_mdp(mdp_file):
 	a = int(l.rstrip().lstrip().split()[1].lstrip())
 	l = file.readline()
 	ends = [int(x.lstrip().rstrip()) for x in l.rstrip().lstrip().split()[1:]]
+	if ends[0] == -1:
+		ends = []
+	ends.sort()
+	set_ends = set(ends)
 	t = [[[] for _ in range(a)] for _ in range(s)]
 	r = [[[] for _ in range(a)] for _ in range(s)]
 	p = [[[] for _ in range(a)] for _ in range(s)]
@@ -28,13 +32,16 @@ def get_mdp(mdp_file):
 		minrw = min(minrw, float(l[4]))
 		if float(l[5]) == 0.00:
 			continue
+		totpr[int(l[1])][int(l[2])] += float(l[5])*float(l[4])
+		if int(l[3]) in set_ends:
+			continue
 		t[int(l[1])][int(l[2])].append(int(l[3]))
 		r[int(l[1])][int(l[2])].append(float(l[4]))
 		p[int(l[1])][int(l[2])].append(float(l[5]))
-		totpr[int(l[1])][int(l[2])] += float(l[5])*float(l[4])
-	t = [[np.array(x) for x in y] for y in t]
-	p = [[np.array(x) for x in y] for y in p]
-	r = [[np.array(x) for x in y] for y in r]
+	t = [[np.array(y, dtype = np.int32) for y in x] for x in t]
+	p = [[np.array(y) for y in x] for x in p]
+	r = [[np.array(y) for y in x] for x in r]
+	totpr = np.array(totpr)
 	mdptype = l[1]
 	l = file.readline()
 	gamma = float(l.rstrip().lstrip().split()[1].lstrip())
@@ -66,8 +73,6 @@ def get_vpi(policy): # get Value function for given policy
 			end_ind += 1
 			continue
 		for j, nxt in enumerate(t[i][policy[state_map[i]][0]]):
-			if nxt in set_ends:
-				continue
 			A[state_map[i]][state_map[nxt]] -= gamma * p[i][policy[state_map[i]][0]][j]
 	
 	V = np.matmul(np.linalg.inv(A), B)
@@ -80,14 +85,16 @@ def get_Q(V): # get action value function for given value function
 		if end_ind < len(ends) and ends[end_ind] == i:
 			end_ind += 1
 			continue
-		Tp = np.zeros((nonts,a))
+		# Tp = np.zeros((nonts,a))
 		for j in range(a): 
 			for k, nxt in enumerate(t[i][j]):
-				if nxt in set_ends:
-					continue
-				Tp[state_map[nxt]][j] = gamma*p[i][j][k]
-			Q[state_map[i]][j] = totpr[i][j]
-		Q[[state_map[i]], :]+= (np.matmul(V.T, Tp)).astype(float)
+				# Tp[state_map[nxt]][j] = gamma*p[i][j][k]
+				Q[state_map[i]][j] += gamma*p[i][j][k]*V[state_map[nxt]][0]
+			# print(type(t[i][j]), file = sys.stderr)
+			# print(list(state_map[t[i][j]]), file = sys.stderr)
+			# Tp[np.ix_(list(state_map[t[i][j]]),[j])] = gamma * p[i][j].reshape((len(t[i][j]),1))
+			Q[state_map[i]][j] += totpr[i][j]
+		# Q[[state_map[i]], :]+= (np.matmul(V.T, Tp)).astype(float)
 	return Q
 
 def value_iteration(): # run value iteration
@@ -152,10 +159,6 @@ if __name__ == '__main__':
 	mdp_file = args.mdp
 	algo = args.algorithm
 	get_mdp(mdp_file)
-	if ends[0] == -1 or mdptype == 'continuing':
-		ends = []
-	ends.sort()
-	set_ends = set(ends)
 	nonts= s -len(ends)
 	state_map = np.arange(s, dtype=np.int32)
 	ends = np.array(ends, dtype=np.int32)
