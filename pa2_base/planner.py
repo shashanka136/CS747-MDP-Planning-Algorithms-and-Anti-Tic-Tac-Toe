@@ -80,13 +80,14 @@ def get_Q(V): # get action value function for given value function
 		if end_ind < len(ends) and ends[end_ind] == i:
 			end_ind += 1
 			continue
-		for j in range(a):
-			Tp = np.zeros((nonts, 1))
+		Tp = np.zeros((nonts,a))
+		for j in range(a): 
 			for k, nxt in enumerate(t[i][j]):
 				if nxt in set_ends:
 					continue
-				Tp[state_map[nxt]][0] = gamma*p[i][j][k]
-			Q[state_map[i]][j] = totpr[i][j] + float(np.matmul(V.T, Tp))
+				Tp[state_map[nxt]][j] = gamma*p[i][j][k]
+			Q[state_map[i]][j] = totpr[i][j]
+		Q[[state_map[i]], :]+= (np.matmul(V.T, Tp)).astype(float)
 	return Q
 
 def value_iteration(): # run value iteration
