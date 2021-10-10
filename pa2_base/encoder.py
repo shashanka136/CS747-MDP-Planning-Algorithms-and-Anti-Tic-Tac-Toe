@@ -14,12 +14,6 @@ def terminal(state): # check if someone losing or winning
 		return True
 	return False
 
-# def add_terminal_state(state):
-# 	global state_map, rev_state_map
-# 	if state not in rev_state_map:
-# 		rev_state_map[state] = len(state_map)
-# 		state_map.append(state)
-
 def add_possible_transitions(state, action):
 	assert not terminal(state), 'states file is incorrect, contains a terminal state'
 	assert '0' in state, 'states file is incorrect, contains a terminal state'
