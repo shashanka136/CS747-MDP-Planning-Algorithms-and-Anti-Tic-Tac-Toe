@@ -56,17 +56,19 @@ def generate_next_policy(player, num_iter):
     # print("\n","Generating the decoded policy file using decoder.py")
     subprocess.call(cmd_decoder,stdout = f)
     f.close()
-    if num_iter <2 :
-        return False
-    f = open('diff','w')
-    cmd_diff = "diff",f'./task3/p{player}_policy{num_iter-2}.txt',f'./task3/p{player}_policy{num_iter}.txt'
-    subprocess.call(cmd_diff, stdout = f)
-    f.close()
-    f = open('diff', 'r')
-    line = f.readline()
-    f.close()
-    os.remove('diff')
-    return not line
+    return
+    # if you want to terminate when policies converge uncomment the below part and comment the return in above line
+    # if num_iter <2 :
+    #     return False
+    # f = open('diff','w')
+    # cmd_diff = "diff",f'./task3/p{player}_policy{num_iter-2}.txt',f'./task3/p{player}_policy{num_iter}.txt'
+    # subprocess.call(cmd_diff, stdout = f)
+    # f.close()
+    # f = open('diff', 'r')
+    # line = f.readline()
+    # f.close()
+    # os.remove('diff')
+    # return not line
 
 if __name__ == "__main__":
     global state_map, first_player, keep, statesfile, deldir
@@ -88,17 +90,22 @@ if __name__ == "__main__":
     state_map.append(get_state_map(statesfile[1]))
     generate_first_policy()
     player = 3-first_player
-    i = 1
-    while i <= iterations and not generate_next_policy(player, i):
-        player = 3- player
-        i += 1
-    if i <= iterations:
-        print('Policies converged')
-    else:
-        print('Policies not converged')
+    for i in range(1,iterations+1):
+        generate_next_policy(player, i)
+        player = 3 - player
+    # if you want to terminate when policies converge, uncomment the below part and comment the above for loop
+    # i = 1
+    # while i <= iterations and not generate_next_policy(player, i):
+    #     player = 3- player
+    #     i += 1
+    # if i <= iterations:
+    #     print('Policies converged')
+    # else:
+    #     print('Policies not converged')
+    
+    rem('attt_mdp')
+    rem('attt_planner')
     if keep == 0:
-        rem('attt_mdp')
-        rem('attt_planner')
         player = first_player
         for i in range(iterations):
             rem(f'./task3/p{player}_policy{i}.txt')
